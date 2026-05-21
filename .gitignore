@@ -221,3 +221,4 @@ __marimo__/
 models
 data
 .claude
+.venv_dashboard
