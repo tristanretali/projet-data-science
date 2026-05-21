@@ -172,15 +172,6 @@ if page == "Vue d'ensemble":
     fig_hist.update_layout(height=380, margin=dict(t=20, b=10))
     st.plotly_chart(fig_hist, use_container_width=True)
 
-    st.markdown("---")
-    st.subheader("Valeurs manquantes par capteur")
-    missing = (
-        df[sensors].isnull().sum().reset_index()
-    )
-    missing.columns = ["Capteur", "Manquantes"]
-    missing["Pourcentage"] = (missing["Manquantes"] / len(df) * 100).round(2)
-    missing = missing[missing["Manquantes"] > 0]
-    st.dataframe(missing, use_container_width=True, hide_index=True)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -381,30 +372,6 @@ elif page == "Interprétabilité":
             "- `current_phase_avg` (17.1%) — surintensité = anomalie électrique ou mécanique"
         )
 
-    st.markdown("---")
-    st.subheader("Distribution des variables clés par classe")
-
-    sensors_top = [f for f in ["temperature_motor", "rpm", "vibration_rms", "current_phase_avg"] if f in df.columns]
-    feat_sel = st.selectbox("Variable", sensors_top)
-
-    df_fi = df[[feat_sel, "failure_within_24h"]].dropna()
-    df_fi["Classe"] = df_fi["failure_within_24h"].map({0: "No Failure", 1: "Failure"})
-
-    fig_box = px.box(
-        df_fi,
-        x="Classe",
-        y=feat_sel,
-        color="Classe",
-        color_discrete_map={"No Failure": "#00CC96", "Failure": "#EF553B"},
-        points="outliers",
-    )
-    fig_box.update_layout(
-        showlegend=False,
-        height=380,
-        margin=dict(t=20, b=10),
-        yaxis_title=feat_sel.replace("_", " ").title(),
-    )
-    st.plotly_chart(fig_box, use_container_width=True)
 
 
 # ════════════════════════════════════════════════════════════════════════════
