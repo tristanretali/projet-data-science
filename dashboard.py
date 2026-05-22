@@ -6,7 +6,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 from sklearn.metrics import (
-    auc, confusion_matrix, precision_recall_curve, roc_curve,
+    auc,
+    confusion_matrix,
+    precision_recall_curve,
+    roc_curve,
 )
 
 warnings.filterwarnings("ignore")
@@ -18,6 +21,7 @@ st.set_page_config(
 )
 
 # ── Chargement des données ──────────────────────────────────────────────────
+
 
 @st.cache_resource
 def load_all():
@@ -35,6 +39,7 @@ def load_all():
         gb = pickle.load(f)
     df = pd.read_csv("dataset/predictive_maintenance_v3.csv")
     return results, data, preprocessor, rf, lr, gb, df
+
 
 results, data, preprocessor, rf, lr, gb, df = load_all()
 
@@ -173,7 +178,6 @@ if page == "Vue d'ensemble":
     st.plotly_chart(fig_hist, use_container_width=True)
 
 
-
 # ════════════════════════════════════════════════════════════════════════════
 # PAGE 2 — COMPARAISON DES MODÈLES
 # ════════════════════════════════════════════════════════════════════════════
@@ -195,7 +199,9 @@ elif page == "Comparaison des modèles":
 
     def highlight_best(col):
         is_max = col == col.max()
-        return ["background-color: #d4edda; font-weight: bold" if v else "" for v in is_max]
+        return [
+            "background-color: #2e7d32; font-weight: bold" if v else "" for v in is_max
+        ]
 
     st.dataframe(
         display_df.style.apply(highlight_best),
@@ -246,7 +252,11 @@ elif page == "Comparaison des modèles":
         st.subheader("Courbes ROC")
         fig_roc = go.Figure()
         fig_roc.add_shape(
-            type="line", x0=0, y0=0, x1=1, y1=1,
+            type="line",
+            x0=0,
+            y0=0,
+            x1=1,
+            y1=1,
             line=dict(dash="dash", color="grey", width=1),
         )
         for key, label in MODEL_LABELS.items():
@@ -255,7 +265,8 @@ elif page == "Comparaison des modèles":
             roc_auc = results["results"][key]["roc_auc"]
             fig_roc.add_trace(
                 go.Scatter(
-                    x=fpr, y=tpr,
+                    x=fpr,
+                    y=tpr,
                     name=f"{label} ({roc_auc:.3f})",
                     line=dict(color=COLORS[label], width=2),
                 )
@@ -279,7 +290,8 @@ elif page == "Comparaison des modèles":
             pr_auc_val = auc(recall_vals, precision)
             fig_pr.add_trace(
                 go.Scatter(
-                    x=recall_vals, y=precision,
+                    x=recall_vals,
+                    y=precision,
                     name=f"{label} ({pr_auc_val:.3f})",
                     line=dict(color=COLORS[label], width=2),
                 )
@@ -318,11 +330,6 @@ elif page == "Interprétabilité":
     st.title("🔍 Interprétabilité des modèles")
 
     st.subheader("Importance des variables — Random Forest")
-    st.markdown(
-        "Mesurée par la réduction d'impureté moyenne (Gini importance). "
-        "Les variables en tête sont celles qui séparent le mieux les classes."
-    )
-
     fi_df = (
         feature_importance.reset_index()
         .rename(columns={"index": "Feature", 0: "Importance"})
@@ -345,7 +352,7 @@ elif page == "Interprétabilité":
         height=420,
         margin=dict(t=20, b=10),
         yaxis_title="",
-        xaxis_title="Importance (Gini)",
+        xaxis_title="Importance",
     )
     st.plotly_chart(fig_fi, use_container_width=True)
 
@@ -354,7 +361,9 @@ elif page == "Interprétabilité":
 
     col1, col2 = st.columns(2)
 
-    top_features = feature_importance.sort_values(ascending=False).head(4).index.tolist()
+    top_features = (
+        feature_importance.sort_values(ascending=False).head(4).index.tolist()
+    )
     numeric_top = [f for f in top_features if f in df.columns]
 
     with col1:
@@ -371,7 +380,6 @@ elif page == "Interprétabilité":
             "- `vibration_rms` (17.8%) — vibrations excessives = usure ou déséquilibre  \n"
             "- `current_phase_avg` (17.1%) — surintensité = anomalie électrique ou mécanique"
         )
-
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -416,8 +424,13 @@ elif page == "Prédiction en temps réel":
         input_df = pd.DataFrame(
             [[vibration, temperature, current, pressure, rpm, ambient, machine_type]],
             columns=[
-                "vibration_rms", "temperature_motor", "current_phase_avg",
-                "pressure_level", "rpm", "ambient_temp", "machine_type",
+                "vibration_rms",
+                "temperature_motor",
+                "current_phase_avg",
+                "pressure_level",
+                "rpm",
+                "ambient_temp",
+                "machine_type",
             ],
         )
 
@@ -477,10 +490,18 @@ elif page == "Prédiction en temps réel":
         st.caption("Basé sur l'importance globale du Random Forest.")
 
         numeric_feats = [
-            "vibration_rms", "temperature_motor", "current_phase_avg",
-            "pressure_level", "rpm", "ambient_temp",
+            "vibration_rms",
+            "temperature_motor",
+            "current_phase_avg",
+            "pressure_level",
+            "rpm",
+            "ambient_temp",
         ]
-        input_vals = dict(zip(numeric_feats, [vibration, temperature, current, pressure, rpm, ambient]))
+        input_vals = dict(
+            zip(
+                numeric_feats, [vibration, temperature, current, pressure, rpm, ambient]
+            )
+        )
 
         contrib_df = pd.DataFrame(
             {
